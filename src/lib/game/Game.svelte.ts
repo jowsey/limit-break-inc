@@ -1,7 +1,12 @@
 class Game {
 	public static readonly Defaults = {
 		balance: 0,
-		tickAccumulator: 0
+		tickAccumulator: 0,
+		coreTier: 1,
+		upgrades: [] as string[],
+		market: {
+			kwhPrice: 0.05
+		}
 	};
 
 	public state = $state(this.getSavedState());
@@ -46,9 +51,12 @@ class Game {
 		localStorage.setItem('lbi-state', JSON.stringify(this.state));
 	}
 
-	getSavedState() {
-		const data = JSON.parse(localStorage.getItem('lbi-state') ?? 'null');
-		return Object.assign({}, Game.Defaults, data);
+	getSavedState(): typeof Game.Defaults {
+		const storedData = JSON.parse(localStorage.getItem('lbi-state') ?? 'null');
+		const data = Object.assign({}, Game.Defaults, storedData); // apply over defaults to ensure all keys exist
+
+		// placeholder: migrate data if need-be
+		return data;
 	}
 }
 

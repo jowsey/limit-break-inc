@@ -11,4 +11,11 @@
 @theme {
 	--font-seven: 'DSEG14ClassicMini-Regular', monospace;
 	--font-sans: 'Red Hat Display', sans-serif;
+	--color-brand-dark: oklch(0.16 0.03 324);
+	--color-brand-light: oklch(0.33 0.03 324);
+}
+
+/* very new feature only supported in new chrome but it's soooo pretty  */
+.smooth-corners {
+	corner-shape: superellipse(1.5);
 }
