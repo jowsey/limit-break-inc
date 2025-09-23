@@ -43,7 +43,7 @@
 		</svg>
 
 		<p
-			class="absolute top-0 left-1/2 m-[0.5em] mt-1 -translate-x-1/2 text-xl font-bold tracking-[1em] text-white/5 select-none"
+			class="absolute top-0 left-1/2 m-[0.5em] mt-1 -translate-x-1/2 text-xl font-black tracking-[1em] text-white/5 select-none"
 		>
 			GENERATING
 		</p>
