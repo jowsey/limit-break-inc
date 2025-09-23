@@ -2,31 +2,33 @@
 	import PowerCore from '$lib/components/PowerCore.svelte';
 	import Window from '$lib/components/Window.svelte';
 	import { game } from '$lib/game/Game.svelte';
-
-	// debug: eventually pull this from Game state
-	let currentPower = $state(1);
-	setInterval(() => {
-		if (currentPower < maxPower) {
-			currentPower += 1;
-		}
-	}, 10);
-	let maxPower = $state(1000);
 </script>
 
-<PowerCore {currentPower} {maxPower}></PowerCore>
+<div class="my-4 flex flex-wrap items-center justify-center">
+	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+	{#each game.persistentState.cores as core, i (i)}
+		<PowerCore {i}></PowerCore>
+	{/each}
+</div>
 
-<div class="grid auto-rows-[128px] grid-cols-1 gap-4 lg:grid-cols-4">
+<div class="mx-auto grid max-w-7xl auto-rows-[128px] grid-cols-1 gap-4 py-2 lg:grid-cols-4">
 	<Window title="Company" class="row-span-2 md:col-span-3">
 		<p class="font-thin tracking-widest">BALANCE</p>
-		<p class="text-3xl font-bold">${game.state.balance.toLocaleString()}</p>
+		<p class="text-3xl font-bold">${game.persistentState.balance.toFixed(2).toLocaleString()}</p>
 	</Window>
 
 	<Window title="Technology" class="row-span-5">
 		<p>yuuup</p>
 	</Window>
+
 	<Window title="Market">
-		<p>yuuup</p>
+		<p class="font-thin tracking-widest">SELL VALUE</p>
+		<div class="flex items-end gap-x-1">
+			<p class="text-3xl font-bold">${game.persistentState.market.kwhPrice.toFixed(2).toLocaleString()}</p>
+			<p>/kWh</p>
+		</div>
 	</Window>
+
 	<Window title="Misc">
 		<p>yuuup</p>
 	</Window>
