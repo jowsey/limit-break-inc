@@ -6,11 +6,15 @@ class Game {
 	private animationFrame: number | null = null;
 	private tickAccumulator = 0;
 
-	public stepMs = 1000 / 20; // 20 ticks per second
-	public timeScale = 60 * 60; // one game hour per real second
+	// Amount of real-time between game ticks
+	public stepMs = 1000 / 20;
+	// Speed multiplier on in-game time
+	public timeScale = 60 * 60;
 
-	public clickPower = 0.1; // each click generates 0.1W
-	public clickDecayMs = 1000 * 3; // clicks decay over 3 seconds
+	// Max watts generated per active decaying click
+	public clickPower = 0.1;
+	// Duration over which to decay clicks
+	public clickDecayMs = 1000 * 3;
 
 	public static readonly Defaults = {
 		balance: 0,
@@ -20,11 +24,23 @@ class Game {
 		}
 	};
 
-	public persistentState = $state(this.getSavedState()); // loaded from localStorage
+	// State saved to localStorage
+	public persistentState = $state(this.getSavedState());
 
-	public coreOutputs: number[] = $state([0]); // in Watts
-	public totalOutput = $derived(this.coreOutputs.reduce((a, b) => a + b, 0)); // combined output of all cores
-	public coreClicks: { time: number }[][] = $state([]); // timestamps of clicks on each core
+	// Output of each active core in watts
+	public coreOutputs: number[] = $state([0]);
+	// Combined output of all cores in watts
+	public totalOutput = $derived(this.coreOutputs.reduce((a, b) => a + b, 0));
+	// Array of active clicks for each core
+	public coreClicks: { time: number }[][] = $state([]);
+
+	private averageSampleCount = 15;
+	private totalOutputSamples: number[] = $state([]);
+
+	// Average total output over the last N ticks
+	public totalOutputSmooth = $derived(
+		this.totalOutputSamples.reduce((a, b) => a + b, 0) / Math.max(this.totalOutputSamples.length, 1)
+	);
 
 	static newCore() {
 		return {
@@ -52,6 +68,12 @@ class Game {
 			}
 
 			this.coreOutputs[i] = coreOutput;
+		}
+
+		// smooth total output
+		this.totalOutputSamples.push(this.totalOutput);
+		if (this.totalOutputSamples.length > this.averageSampleCount) {
+			this.totalOutputSamples.shift();
 		}
 
 		this.persistentState.balance += this.totalOutput * hoursDelta * this.timeScale * this.persistentState.market.kwhPrice;

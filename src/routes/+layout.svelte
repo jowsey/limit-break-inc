@@ -71,7 +71,7 @@
 		</p>
 
 		<p class="absolute top-0 left-1/2 mt-1 -translate-x-1/2 font-seven text-xl font-black drop-shadow-sm drop-shadow-fuchsia-700">
-			{formatWatts(game.totalOutput)}
+			{formatWatts(game.totalOutputSmooth)}
 		</p>
 	</div>
 
