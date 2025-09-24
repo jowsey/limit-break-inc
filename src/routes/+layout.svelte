@@ -40,13 +40,19 @@
 			<path d="M0,10 L386,10" fill="none" stroke="var(--color-brand-light)" stroke-width="0.5" />
 		</svg>
 
-		<svg class="flex-shrink-0" width="428" height="40" viewBox="386 0 428 32" preserveAspectRatio="none">
+		<svg
+			class="absolute left-1/2 flex-shrink-0 -translate-x-1/2"
+			width="428"
+			height="40"
+			viewBox="0 0 428 32"
+			preserveAspectRatio="none"
+		>
 			<path
-				d="M386,0 L386,10 C386,10 398,10 404,12 C410,14 416,18 422,22 C428,26 434,28 446,28 L754,28 C766,28 772,26 778,22 784,18 790,14 796,12 802,10 814,10 814,10 L814,0 Z"
+				d="M0,0 L0,10 C0,10 12,10 18,12 C24,14 30,18 36,22 C42,26 48,28 60,28 L368,28 C380,28 386,26 392,22 398,18 404,14 410,12 416,10 428,10 428,10 L428,0 Z"
 				fill="var(--color-brand-dark)"
 			/>
 			<path
-				d="M386,10 C386,10 398,10 404,12 C410,14 416,18 422,22 C428,26 434,28 446,28 L754,28 C766,28 772,26 778,22 784,18 790,14 796,12 802,10 814,10 814,10"
+				d="M0,10 C0,10 12,10 18,12 C24,14 30,18 36,22 C42,26 48,28 60,28 L368,28 C380,28 386,26 392,22 398,18 404,14 410,12 416,10 428,10 428,10"
 				fill="none"
 				stroke="var(--color-brand-light)"
 				stroke-width="0.5"
