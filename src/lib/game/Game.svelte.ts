@@ -1,7 +1,5 @@
 import { Upgrades, type UpgradeId, type UpgradeStat } from './data/Upgrades';
 
-interface Core {}
-
 class Game {
 	private animationFrame: number | null = null;
 	private tickAccumulator = 0;
@@ -19,7 +17,7 @@ class Game {
 	public static readonly Defaults = {
 		balance: 0,
 		upgrades: [] as { id: string; count: number }[],
-		cores: [Game.newCore()] as Core[],
+		cores: 1,
 		market: {
 			kwhPrice: 0.05
 		}
@@ -40,12 +38,6 @@ class Game {
 
 	// Average total output over the last N ticks
 	public totalOutputSmooth = $derived(this.totalOutputSamples.reduce((a, b) => a + b, 0) / Math.max(this.totalOutputSamples.length, 1));
-
-	static newCore() {
-		return {
-			upgrades: []
-		} as Core;
-	}
 
 	// 1 is positive, -1 is negative, 0 is neutral
 	getUpgradePositivity(upgradeId: UpgradeId, forStat: UpgradeStat) {
@@ -140,7 +132,7 @@ class Game {
 		const currentTime = performance.now();
 
 		// calculate core outputs
-		for (let i = 0; i < this.persistentState.cores.length; i++) {
+		for (let i = 0; i < this.persistentState.cores; i++) {
 			// const core = this.persistentState.cores[i]; // todo use upgrades
 			let coreOutput = 0;
 
