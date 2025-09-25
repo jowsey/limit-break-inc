@@ -1,6 +1,6 @@
-interface Core {
-	upgrades: { id: string; count: number }[];
-}
+import { Upgrades, type UpgradeId, type UpgradeStat } from './data/Upgrades';
+
+interface Core {}
 
 class Game {
 	private animationFrame: number | null = null;
@@ -18,6 +18,7 @@ class Game {
 
 	public static readonly Defaults = {
 		balance: 0,
+		upgrades: [] as { id: string; count: number }[],
 		cores: [Game.newCore()] as Core[],
 		market: {
 			kwhPrice: 0.05
@@ -38,14 +39,100 @@ class Game {
 	private totalOutputSamples: number[] = $state([]);
 
 	// Average total output over the last N ticks
-	public totalOutputSmooth = $derived(
-		this.totalOutputSamples.reduce((a, b) => a + b, 0) / Math.max(this.totalOutputSamples.length, 1)
-	);
+	public totalOutputSmooth = $derived(this.totalOutputSamples.reduce((a, b) => a + b, 0) / Math.max(this.totalOutputSamples.length, 1));
 
 	static newCore() {
 		return {
 			upgrades: []
 		} as Core;
+	}
+
+	// 1 is positive, -1 is negative, 0 is neutral
+	getUpgradePositivity(upgradeId: UpgradeId, forStat: UpgradeStat) {
+		const upgrade = Upgrades.find((u) => u.id === upgradeId);
+		if (!upgrade) {
+			console.warn('Tried to get effect positivity for unknown upgrade', upgradeId);
+			return 0;
+		}
+
+		const effect = upgrade.effects.find((e) => e.stat === forStat);
+		if (!effect) {
+			console.warn('Tried to get effect positivity for unset stat on upgrade', upgradeId, forStat);
+			return 0;
+		}
+
+		if (effect.method === 'add') {
+			const sign = Math.sign(effect.value);
+			return upgrade.invertPositivity ? -sign : sign;
+		}
+		if (effect.method === 'multiply') {
+			// above/below 1
+			const sign = Math.sign(effect.value - 1);
+			return upgrade.invertPositivity ? -sign : sign;
+		}
+	}
+
+	getUpgradeLevel(upgradeId: UpgradeId) {
+		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
+		return upgradeEntry ? upgradeEntry.count : 0;
+	}
+
+	getUpgradeEffectTotal(upgradeId: UpgradeId, forStat: UpgradeStat) {
+		const upgrade = Upgrades.find((u) => u.id === upgradeId);
+		if (!upgrade) {
+			console.warn('Tried to get effect total for unknown upgrade', upgradeId);
+			return 0;
+		}
+
+		const effect = upgrade.effects.find((e) => e.stat === forStat);
+		if (!effect) {
+			console.warn('Tried to get effect total for unset stat on upgrade', upgradeId, forStat);
+			return 0;
+		}
+
+		let total = effect?.method === 'multiply' ? 1 : 0;
+
+		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
+		if (!upgradeEntry) return total;
+
+		if (effect.method === 'add') {
+			total += effect.value * upgradeEntry.count;
+		} else if (effect.method === 'multiply') {
+			total += effect.value ** upgradeEntry.count;
+		}
+		return total;
+	}
+
+	calculateUpgradeCost(upgradeId: UpgradeId) {
+		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
+		const baseCost = Upgrades.find((u) => u.id === upgradeId)?.cost ?? 0;
+		const scaling = Upgrades.find((u) => u.id === upgradeId)?.costScaling ?? 1.26;
+
+		if (upgradeEntry) {
+			return baseCost * scaling ** upgradeEntry.count;
+		} else {
+			return baseCost;
+		}
+	}
+
+	purchaseUpgrade(upgradeId: UpgradeId) {
+		const upgrade = Upgrades.find((u) => u.id === upgradeId);
+		if (!upgrade) {
+			console.warn('Tried to purchase unknown upgrade', upgradeId);
+			return;
+		}
+
+		if (game.persistentState.balance < upgrade.cost) return;
+
+		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
+
+		if (upgradeEntry) {
+			upgradeEntry.count++;
+		} else {
+			this.persistentState.upgrades.push({ id: upgradeId, count: 1 });
+		}
+
+		game.persistentState.balance -= this.calculateUpgradeCost(upgradeId);
 	}
 
 	tick() {

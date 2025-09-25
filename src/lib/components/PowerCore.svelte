@@ -55,10 +55,7 @@
 		<div class="absolute inset-0 rounded-full border border-white/15 blur-sm"></div>
 		<div class="absolute inset-0 rounded-full border border-white/15 blur-md"></div>
 		<div class="absolute inset-0 rounded-full border border-white/15 blur-lg"></div>
-		<div
-			style="border-width: calc(8px * var(--power-ratio))"
-			class="absolute inset-0 rounded-full border-fuchsia-700 blur-lg"
-		></div>
+		<div style="border-width: calc(8px * var(--power-ratio))" class="absolute inset-0 rounded-full border-fuchsia-700 blur-lg"></div>
 
 		<div class="relative flex size-full items-center justify-center blur-xs">
 			<div id="core-center" class="rounded-full"></div>

@@ -1,6 +1,7 @@
 <script>
 	import PowerCore from '$lib/components/PowerCore.svelte';
 	import Window from '$lib/components/Window.svelte';
+	import { StatTypeToString, Upgrades } from '$lib/game/data/Upgrades';
 	import { game } from '$lib/game/Game.svelte';
 </script>
 
@@ -18,7 +19,44 @@
 	</Window>
 
 	<Window title="Technology" class="row-span-5">
-		<p>yuuup</p>
+		{#each Upgrades as upgrade (upgrade.id)}
+			<div class="-mx-4 mb-1 flex flex-col bg-neutral-50/5 p-2">
+				<p class="text-sm font-bold tracking-wide uppercase">
+					{upgrade.displayName} <span class="text-xs">Mk. {game.getUpgradeLevel(upgrade.id) + 1}</span>
+				</p>
+				<p class="text-xs text-neutral-300">{upgrade.description}</p>
+				{#each upgrade.effects as effect (effect.stat)}
+					{@const positivity = game.getUpgradePositivity(upgrade.id, effect.stat)}
+					{@const operator = effect.method === 'add' ? (effect.value > 0 ? '+' : '-') : '×'}
+					<div class="mt-1 flex w-full items-center justify-between text-xs text-neutral-300">
+						<p>
+							<span class={positivity === 1 ? 'text-lime-500' : positivity === -1 ? 'text-red-500' : 'text-neutral-500'}>
+								{operator}{effect.value.toFixed(2)}
+							</span>
+							{StatTypeToString[effect.stat]}
+						</p>
+						<p>
+							<span class={positivity === 1 ? 'text-lime-500' : positivity === -1 ? 'text-red-500' : 'text-neutral-500'}>
+								{operator}{game.getUpgradeEffectTotal(upgrade.id, effect.stat).toFixed(2)}
+							</span>
+							<!-- {StatToString[effect.stat]} -->
+							total
+						</p>
+					</div>
+				{/each}
+				<div class="mt-2 flex w-full items-center gap-x-2">
+					<button
+						class="flex-1 cursor-pointer rounded bg-brand-light px-2 py-1 text-sm hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
+						on:click={() => game.purchaseUpgrade(upgrade.id)}
+						disabled={game.persistentState.balance < game.calculateUpgradeCost(upgrade.id)}
+					>
+						<p>UPGRADE</p>
+					</button>
+
+					<p class="min-w-1/4 text-right text-sm font-bold">${game.calculateUpgradeCost(upgrade.id).toFixed(2).toLocaleString()}</p>
+				</div>
+			</div>
+		{/each}
 	</Window>
 
 	<Window title="Market">
