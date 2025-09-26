@@ -187,9 +187,8 @@ class Game {
 		return totalFlux;
 	}
 
-	tick(numTicks: number) {
-		// time in hours passed this tick
-		const deltaTime = (this.stepMs / 1000) * numTicks;
+	tick() {
+		const deltaTime = this.stepMs / 1000;
 		const deltaHours = deltaTime / 60 / 60;
 
 		const decayRate = this.getUpgradedStat('clickDecayRate');
@@ -203,7 +202,7 @@ class Game {
 		for (let i = 0; i < this.persistentState.cores; i++) {
 			let coreInputFlux = inputFlux / this.persistentState.cores;
 
-			if (!this.coreClicks[i]) continue;
+			if (!this.coreClicks[i]) this.coreClicks[i] = [];
 
 			// apply clicks
 			for (const click of this.coreClicks[i]) {
@@ -244,10 +243,9 @@ class Game {
 
 			this.tickAccumulator += deltaTime;
 
-			if (this.tickAccumulator >= this.stepMs) {
-				const numTicks = Math.floor(this.tickAccumulator / this.stepMs);
-				this.tickAccumulator -= this.stepMs * numTicks;
-				this.tick(numTicks);
+			while (this.tickAccumulator >= this.stepMs) {
+				this.tickAccumulator -= this.stepMs;
+				this.tick();
 			}
 
 			this.animationFrame = requestAnimationFrame(frame);
