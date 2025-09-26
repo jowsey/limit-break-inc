@@ -1,4 +1,5 @@
-import { DefaultCoreStats, Upgrades, type UpgradeId, type UpgradeStat } from './data/Upgrades';
+import { Stories } from './data/NewsStories';
+import { DefaultCoreStats, Upgrades, type UpgradeStat } from './data/Upgrades';
 
 class Game {
 	private animationFrame: number | null = null;
@@ -8,13 +9,15 @@ class Game {
 	public stepMs = 1000 / 20;
 	// Speed multiplier on in-game time
 	public timeScale = 60 * 60;
+	// $/kWh
+	public kwhPrice = 0.06;
 
 	public static readonly Defaults = {
 		balance: 0,
 		upgrades: [] as { id: string; count: number }[],
 		cores: 1,
-		market: {
-			kwhPrice: 0.05
+		news: {
+			unlocked: [] as string[]
 		}
 	};
 
@@ -35,7 +38,7 @@ class Game {
 	public totalOutputSmooth = $derived(this.totalOutputSamples.reduce((a, b) => a + b, 0) / Math.max(this.totalOutputSamples.length, 1));
 
 	// 1 is positive, -1 is negative, 0 is neutral
-	getUpgradePositivity(upgradeId: UpgradeId, forStat: UpgradeStat) {
+	getUpgradePositivity(upgradeId: string, forStat: UpgradeStat) {
 		const upgrade = Upgrades.find((u) => u.id === upgradeId);
 		if (!upgrade) {
 			console.warn('Tried to get effect positivity for unknown upgrade', upgradeId);
@@ -59,12 +62,12 @@ class Game {
 		}
 	}
 
-	getUpgradeLevel(upgradeId: UpgradeId) {
+	getUpgradeLevel(upgradeId: string) {
 		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
 		return upgradeEntry ? upgradeEntry.count : 0;
 	}
 
-	getUpgradeEffectTotal(upgradeId: UpgradeId, forStat: UpgradeStat) {
+	getUpgradeEffectTotal(upgradeId: string, forStat: UpgradeStat) {
 		const upgrade = Upgrades.find((u) => u.id === upgradeId);
 		if (!upgrade) {
 			console.warn('Tried to get effect total for unknown upgrade', upgradeId);
@@ -110,10 +113,10 @@ class Game {
 		return total;
 	}
 
-	calculateUpgradeCost(upgradeId: UpgradeId) {
+	calculateUpgradeCost(upgradeId: string) {
 		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
 		const baseCost = Upgrades.find((u) => u.id === upgradeId)?.cost ?? 0;
-		const scaling = Upgrades.find((u) => u.id === upgradeId)?.costScaling ?? 1.26;
+		const scaling = Upgrades.find((u) => u.id === upgradeId)?.costScaling ?? 1.22;
 
 		if (upgradeEntry) {
 			return baseCost * scaling ** upgradeEntry.count;
@@ -122,7 +125,7 @@ class Game {
 		}
 	}
 
-	purchaseUpgrade(upgradeId: UpgradeId) {
+	purchaseUpgrade(upgradeId: string) {
 		const upgrade = Upgrades.find((u) => u.id === upgradeId);
 		if (!upgrade) {
 			console.warn('Tried to purchase unknown upgrade', upgradeId);
@@ -230,7 +233,14 @@ class Game {
 			this.totalOutputSamples.shift();
 		}
 
-		this.persistentState.balance += this.totalOutput * this.persistentState.market.kwhPrice * deltaHours * this.timeScale;
+		this.persistentState.balance += this.totalOutput * this.kwhPrice * deltaHours * this.timeScale;
+
+		// check story requirements
+		for (const story of Stories) {
+			if (!this.persistentState.news.unlocked.find((id) => id === story.id) && (!story.requirements || story.requirements())) {
+				this.persistentState.news.unlocked.push(story.id);
+			}
+		}
 	}
 
 	runLoop() {

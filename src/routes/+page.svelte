@@ -1,4 +1,5 @@
 <script>
+	import NewsBox from '$lib/components/NewsBox.svelte';
 	import PowerCore from '$lib/components/PowerCore.svelte';
 	import Window from '$lib/components/Window.svelte';
 	import { StatTypeToString, Upgrades } from '$lib/game/data/Upgrades';
@@ -13,17 +14,28 @@
 	{/each}
 </div>
 
-<div class="mx-auto grid max-w-7xl auto-rows-[128px] grid-cols-1 gap-4 py-2 sm:grid-cols-2 lg:grid-cols-4">
-	<Window title="Company" class="row-span-2 lg:col-span-3">
+<div class="mx-auto grid max-w-7xl auto-rows-[128px] grid-cols-1 gap-4 pt-2 pb-4 sm:grid-cols-2 lg:grid-cols-4">
+	<Window title="Company" class="row-span-2">
 		<p class="font-thin tracking-widest">BALANCE</p>
 		<p class="text-3xl font-bold">${game.persistentState.balance.toFixed(2).toLocaleString()}</p>
+
+		<p class="mt-2 font-thin tracking-widest">SELL VALUE</p>
+		<div class="flex items-end gap-x-1">
+			<p class="text-3xl font-bold">${game.kwhPrice.toFixed(2).toLocaleString()}</p>
+			<p>/kWh</p>
+		</div>
+	</Window>
+
+	<Window title="News" class="col-span-2 row-span-2">
+		<NewsBox></NewsBox>
 	</Window>
 
 	<Window title="Technology" class="row-span-5">
 		{#each Upgrades as upgrade (upgrade.id)}
 			<div class="-mx-4 mb-1 flex flex-col bg-neutral-50/5 p-2">
 				<p class="text-sm font-bold tracking-wide uppercase">
-					{upgrade.displayName} <span class="text-xs font-normal">Mk. {game.getUpgradeLevel(upgrade.id) + 1}</span>
+					{upgrade.displayName}
+					<span class="text-xs font-normal">Mk. {game.getUpgradeLevel(upgrade.id) + (upgrade.countOneHigher ? 1 : 0)}</span>
 				</p>
 				{#each upgrade.effects as effect (effect.stat)}
 					{@const positivity = game.getUpgradePositivity(upgrade.id, effect.stat)}
@@ -59,21 +71,13 @@
 		{/each}
 	</Window>
 
-	<Window title="Market">
-		<p class="font-thin tracking-widest">SELL VALUE</p>
-		<div class="flex items-end gap-x-1">
-			<p class="text-3xl font-bold">${game.persistentState.market.kwhPrice.toFixed(2).toLocaleString()}</p>
-			<p>/kWh</p>
-		</div>
-	</Window>
-
-	<Window title="Misc">
-		<p>yuuup</p>
-	</Window>
 	<Window title="Other">
 		<p>yuuup</p>
 	</Window>
 	<Window title="Misc">
+		<p>yuuup</p>
+	</Window>
+	<Window title="Other">
 		<p>yuuup</p>
 	</Window>
 	<Window title="Other">

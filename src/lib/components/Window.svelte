@@ -11,7 +11,7 @@
 <div
 	{...attribs}
 	class={[
-		'smooth-corners overflow-auto rounded-3xl border-[0.5px] border-brand-light bg-gradient-to-tl from-brand-dark from-5% p-4',
+		'smooth-corners flex flex-col overflow-auto rounded-3xl border-[0.5px] border-brand-light bg-gradient-to-tl from-brand-dark from-5% p-4',
 		attribs.class
 	]}
 >
