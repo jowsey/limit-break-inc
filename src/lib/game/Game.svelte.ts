@@ -194,6 +194,8 @@ class Game {
 
 		const decayRate = this.getUpgradedStat('clickDecayRate');
 		const wattsPerFlux = this.getUpgradedStat('wattsPerFlux');
+		const thermalLimitDeg = this.getUpgradedStat('thermalLimitDeg');
+		const heatPerWatt = this.getUpgradedStat('heatPerWatt');
 
 		// calculate core outputs
 		const inputFlux = this.getUpgradedStat('fluxHarvestRate') * deltaTime;
@@ -212,6 +214,13 @@ class Game {
 
 			// filter out old clicks
 			this.coreClicks[i] = this.coreClicks[i].filter((click) => click.flux >= 0);
+
+			// reduce efficiency when over-utilised
+			const utilisation = (coreInputFlux * wattsPerFlux * heatPerWatt) / thermalLimitDeg;
+			if (utilisation > 1) {
+				// const overUtil = utilisation - 1; // todo drop-off curve
+				coreInputFlux /= utilisation;
+			}
 
 			this.coreOutputs[i] = coreInputFlux * wattsPerFlux;
 		}
@@ -276,3 +285,6 @@ class Game {
 }
 
 export const game = new Game();
+
+// @ts-expect-error for debugging
+window.game = game;
