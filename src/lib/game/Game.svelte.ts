@@ -2,7 +2,7 @@ import { Stories } from './data/NewsStories';
 import { DefaultCoreStats, Upgrades, type UpgradeStat } from './data/Upgrades';
 
 class Game {
-	private animationFrame: number | null = null;
+	private intervalId: ReturnType<typeof setInterval> | null = null;
 	private tickAccumulator = 0;
 
 	// Amount of real-time between game ticks
@@ -246,7 +246,7 @@ class Game {
 	runLoop() {
 		let currentTime = performance.now();
 
-		const frame = () => {
+		this.intervalId = setInterval(() => {
 			const newTime = performance.now();
 			const deltaTime = newTime - currentTime;
 			currentTime = newTime;
@@ -257,17 +257,13 @@ class Game {
 				this.tickAccumulator -= this.stepMs;
 				this.tick();
 			}
-
-			this.animationFrame = requestAnimationFrame(frame);
-		};
-
-		this.animationFrame = requestAnimationFrame(frame);
+		}, this.stepMs);
 	}
 
 	stopLoop() {
-		if (this.animationFrame !== null) {
-			cancelAnimationFrame(this.animationFrame);
-			this.animationFrame = null;
+		if (this.intervalId !== null) {
+			clearInterval(this.intervalId);
+			this.intervalId = null;
 		}
 	}
 
