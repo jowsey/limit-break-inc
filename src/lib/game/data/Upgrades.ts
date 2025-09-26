@@ -86,6 +86,19 @@ export const Upgrades: Upgrade[] = [
 		]
 	},
 	{
+		id: 'concentration-lenses',
+		displayName: 'Concentration Lenses',
+		description: 'Specialised lenses focus Flux into a smaller area, making power generation more effective.',
+		cost: 4,
+		effects: [
+			{
+				stat: 'wattsPerFlux',
+				method: 'multiply',
+				value: 1.05
+			}
+		]
+	},
+	{
 		id: 'thermal-recycling',
 		displayName: 'Thermal Recycling',
 		description:
