@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { game } from '$lib/game/Game.svelte';
 	import { page } from '$app/state';
+	import SevenSegmentText from '$lib/components/SevenSegmentText.svelte';
 
 	let { children } = $props();
 
@@ -62,9 +63,7 @@
 			GENERATING
 		</p>
 
-		<p class="absolute top-0 left-1/2 mt-1 -translate-x-1/2 font-seven text-xl font-black drop-shadow-sm drop-shadow-fuchsia-700">
-			{formatWatts(game.totalOutputSmooth)}
-		</p>
+		<SevenSegmentText text={formatWatts(game.totalOutputSmooth)} class="absolute top-0 left-1/2 mt-1 -translate-x-1/2 text-xl" />
 	</div>
 
 	{@render children?.()}

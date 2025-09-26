@@ -1,4 +1,4 @@
-import { Upgrades, type UpgradeId, type UpgradeStat } from './data/Upgrades';
+import { DefaultCoreStats, Upgrades, type UpgradeId, type UpgradeStat } from './data/Upgrades';
 
 class Game {
 	private animationFrame: number | null = null;
@@ -8,11 +8,6 @@ class Game {
 	public stepMs = 1000 / 20;
 	// Speed multiplier on in-game time
 	public timeScale = 60 * 60;
-
-	// Max watts generated per active decaying click
-	public clickPower = 0.1;
-	// Duration over which to decay clicks
-	public clickDecayMs = 1000 * 3;
 
 	public static readonly Defaults = {
 		balance: 0,
@@ -31,7 +26,7 @@ class Game {
 	// Combined output of all cores in watts
 	public totalOutput = $derived(this.coreOutputs.reduce((a, b) => a + b, 0));
 	// Array of active clicks for each core
-	public coreClicks: { time: number }[][] = $state([]);
+	public coreClicks: { flux: number }[][] = $state([]);
 
 	private averageSampleCount = 15;
 	private totalOutputSamples: number[] = $state([]);
@@ -95,6 +90,26 @@ class Game {
 		return total;
 	}
 
+	getUpgradedStat(forStat: UpgradeStat) {
+		let total = DefaultCoreStats[forStat] ?? 0;
+
+		for (const ownedUpgrade of this.persistentState.upgrades) {
+			const upgrade = Upgrades.find((u) => u.id === ownedUpgrade.id);
+			if (!upgrade) continue;
+
+			const effect = upgrade.effects.find((e) => e.stat === forStat);
+			if (!effect) continue;
+
+			if (effect.method === 'add') {
+				total += effect.value * ownedUpgrade.count;
+			} else if (effect.method === 'multiply') {
+				total *= effect.value ** ownedUpgrade.count;
+			}
+		}
+
+		return total;
+	}
+
 	calculateUpgradeCost(upgradeId: UpgradeId) {
 		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
 		const baseCost = Upgrades.find((u) => u.id === upgradeId)?.cost ?? 0;
@@ -118,35 +133,65 @@ class Game {
 
 		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
 
+		game.persistentState.balance -= this.calculateUpgradeCost(upgradeId);
+
 		if (upgradeEntry) {
 			upgradeEntry.count++;
 		} else {
 			this.persistentState.upgrades.push({ id: upgradeId, count: 1 });
 		}
+	}
 
-		game.persistentState.balance -= this.calculateUpgradeCost(upgradeId);
+	addCoreClick(coreIndex: number) {
+		if (coreIndex < 0 || coreIndex >= this.persistentState.cores) {
+			console.warn('Tried to add click to invalid core index', coreIndex);
+			return;
+		}
+
+		if (!this.coreClicks[coreIndex]) this.coreClicks[coreIndex] = [];
+
+		this.coreClicks[coreIndex].push({ flux: this.getUpgradedStat('fluxPerClick') });
+	}
+
+	getCoreTemperature(coreIndex: number) {
+		const heatPerWatt = this.getUpgradedStat('heatPerWatt');
+
+		if (coreIndex < 0 || coreIndex >= this.persistentState.cores) {
+			console.warn('Tried to get temperature of invalid core index', coreIndex);
+			return 0;
+		}
+
+		const coreOutput = this.coreOutputs[coreIndex] ?? 0;
+		return coreOutput * heatPerWatt;
 	}
 
 	tick() {
-		const hoursDelta = this.stepMs / 1000 / 60 / 60;
-		const currentTime = performance.now();
+		// time in hours passed this tick
+		const deltaTime = this.stepMs / 1000;
+		const deltaHours = deltaTime / 60 / 60;
+
+		const decayRate = this.getUpgradedStat('clickDecayRate');
+		const wattsPerFlux = this.getUpgradedStat('wattsPerFlux');
 
 		// calculate core outputs
+		const inputFlux = this.getUpgradedStat('fluxHarvestRate') * deltaTime;
+
 		for (let i = 0; i < this.persistentState.cores; i++) {
-			// const core = this.persistentState.cores[i]; // todo use upgrades
-			let coreOutput = 0;
+			let coreInputFlux = inputFlux;
 
-			// filter out old clicks
 			if (!this.coreClicks[i]) this.coreClicks[i] = [];
-			this.coreClicks[i] = this.coreClicks[i].filter((click) => currentTime - click.time < this.clickDecayMs);
 
+			// apply clicks
 			for (const click of this.coreClicks[i]) {
-				const age = currentTime - click.time;
-				const decayFactor = 1 - age / this.clickDecayMs;
-				coreOutput += this.clickPower * decayFactor;
+				// we apply before decaying so that clicks always give their full amount at least once
+				coreInputFlux += click.flux;
+				click.flux -= decayRate * deltaTime;
 			}
 
-			this.coreOutputs[i] = coreOutput;
+			// filter out old clicks
+			this.coreClicks[i] = this.coreClicks[i].filter((click) => click.flux >= 0);
+
+			this.coreOutputs[i] = coreInputFlux * wattsPerFlux;
 		}
 
 		// smooth total output
@@ -155,7 +200,7 @@ class Game {
 			this.totalOutputSamples.shift();
 		}
 
-		this.persistentState.balance += this.totalOutput * hoursDelta * this.timeScale * this.persistentState.market.kwhPrice;
+		this.persistentState.balance += this.totalOutput * this.persistentState.market.kwhPrice * deltaHours * this.timeScale;
 	}
 
 	runLoop() {

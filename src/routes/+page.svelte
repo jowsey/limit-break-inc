@@ -13,8 +13,8 @@
 	{/each}
 </div>
 
-<div class="mx-auto grid max-w-7xl auto-rows-[128px] grid-cols-1 gap-4 py-2 lg:grid-cols-4">
-	<Window title="Company" class="row-span-2 md:col-span-3">
+<div class="mx-auto grid max-w-7xl auto-rows-[128px] grid-cols-1 gap-4 py-2 sm:grid-cols-2 lg:grid-cols-4">
+	<Window title="Company" class="row-span-2 lg:col-span-3">
 		<p class="font-thin tracking-widest">BALANCE</p>
 		<p class="text-3xl font-bold">${game.persistentState.balance.toFixed(2).toLocaleString()}</p>
 	</Window>
@@ -23,7 +23,7 @@
 		{#each Upgrades as upgrade (upgrade.id)}
 			<div class="-mx-4 mb-1 flex flex-col bg-neutral-50/5 p-2">
 				<p class="text-sm font-bold tracking-wide uppercase">
-					{upgrade.displayName} <span class="text-xs">Mk. {game.getUpgradeLevel(upgrade.id) + 1}</span>
+					{upgrade.displayName} <span class="text-xs font-normal">Mk. {game.getUpgradeLevel(upgrade.id) + 1}</span>
 				</p>
 				<p class="text-xs text-neutral-300">{upgrade.description}</p>
 				{#each upgrade.effects as effect (effect.stat)}
@@ -40,7 +40,6 @@
 							<span class={positivity === 1 ? 'text-lime-500' : positivity === -1 ? 'text-red-500' : 'text-neutral-500'}>
 								{operator}{game.getUpgradeEffectTotal(upgrade.id, effect.stat).toFixed(2)}
 							</span>
-							<!-- {StatToString[effect.stat]} -->
 							total
 						</p>
 					</div>

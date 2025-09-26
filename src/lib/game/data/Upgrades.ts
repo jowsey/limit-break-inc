@@ -1,16 +1,18 @@
-export type UpgradeStat = 'fluxPerClick' | 'clickDecayRate' | 'fluxHarvestRate' | 'wattsPerFlux' | 'heatPerWatt' | 'heatCapacity';
+export type UpgradeStat = 'fluxPerClick' | 'clickDecayRate' | 'fluxHarvestRate' | 'wattsPerFlux' | 'heatPerWatt' | 'thermalLimitDeg';
 
 export interface StatValue {
 	stat: UpgradeStat;
 	value: number;
 }
 
-// export const CoreBaseStats: StatValue[] = [
-// 	{ stat: 'fluxHarvestRate', value: 0 },
-// 	{ stat: 'wattsPerFlux', value: 0.1 },
-// 	{ stat: 'heatPerWatt', value: 0.5 },
-// 	{ stat: 'heatCapacity', value: 10 }
-// ];
+export const DefaultCoreStats: Record<UpgradeStat, number> = {
+	fluxPerClick: 1,
+	clickDecayRate: 0.33,
+	fluxHarvestRate: 0,
+	wattsPerFlux: 0.1,
+	heatPerWatt: 8,
+	thermalLimitDeg: 40
+};
 
 export const StatTypeToString: Record<UpgradeStat, string> = {
 	fluxPerClick: 'flux/click',
@@ -18,7 +20,7 @@ export const StatTypeToString: Record<UpgradeStat, string> = {
 	fluxHarvestRate: 'flux/s',
 	wattsPerFlux: 'W/flux',
 	heatPerWatt: '°C/W',
-	heatCapacity: 'Max °C'
+	thermalLimitDeg: 'Max °C'
 } as const;
 
 interface UpgradeEffect extends StatValue {
@@ -55,13 +57,13 @@ export const Upgrades: Upgrade[] = [
 	{
 		id: 'flux-injectors',
 		displayName: 'Flux Injectors',
-		description: 'Harvest Flux from their surroundings and inject it into Flux Cores.',
+		description: 'Condense Flux found in the surroundings and inject it into Flux Cores.',
 		cost: 5,
 		effects: [
 			{
 				stat: 'fluxHarvestRate',
 				method: 'add',
-				value: 0.03
+				value: 13.33
 			}
 		]
 	},
