@@ -9,8 +9,8 @@ export const DefaultCoreStats: Record<UpgradeStat, number> = {
 	fluxPerClick: 1,
 	clickDecayRate: 0.25,
 	fluxHarvestRate: 0,
-	wattsPerFlux: 0.1,
-	heatPerWatt: 8,
+	wattsPerFlux: 0.12,
+	heatPerWatt: 7.5,
 	thermalLimitDeg: 40
 };
 
@@ -81,7 +81,7 @@ export const Upgrades: Upgrade[] = [
 			{
 				stat: 'fluxHarvestRate',
 				method: 'add',
-				value: 16.67
+				value: 22.22
 			}
 		]
 	},
@@ -89,7 +89,7 @@ export const Upgrades: Upgrade[] = [
 		id: 'concentration-lenses',
 		displayName: 'Concentration Lenses',
 		description: 'Specialised lenses focus Flux into a smaller area, making power generation more effective.',
-		cost: 4,
+		cost: 8,
 		effects: [
 			{
 				stat: 'wattsPerFlux',
@@ -103,7 +103,7 @@ export const Upgrades: Upgrade[] = [
 		displayName: 'Thermal Recycling',
 		description:
 			'Improvements to heat efficiency can reduce waste heat generated, increasing the amount of power that can be generated without overloading a Core.',
-		cost: 10.5,
+		cost: 16,
 		effects: [
 			{
 				stat: 'heatPerWatt',
@@ -117,7 +117,7 @@ export const Upgrades: Upgrade[] = [
 		id: 'thermal-coating',
 		displayName: 'Thermal Coating',
 		description: 'Advanced coatings can help dissipate heat, increasing the maximum safe operating temperature of a Core.',
-		cost: 15,
+		cost: 12,
 		effects: [
 			{
 				stat: 'thermalLimitDeg',
