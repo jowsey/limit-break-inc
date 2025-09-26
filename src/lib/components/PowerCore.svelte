@@ -45,11 +45,7 @@
 	<p class="absolute ml-[0.5em] text-xl font-black tracking-[0.5em] text-neutral-50/5 select-none">CORE {i + 1}</p>
 	<div class="absolute flex flex-col items-center">
 		<SevenSegmentText class="text-xl" text={game.getCoreTemperature(i).toFixed(0) + '°C'} minDigits={5} />
-		<SevenSegmentText
-			class="text-sm"
-			text={Math.round((game.getCoreTemperature(i) / game.getUpgradedStat('thermalLimitDeg')) * 100) + '%'}
-			minDigits={4}
-		/>
+		<SevenSegmentText class="text-sm" text={Math.round(utilisation * 100) + '%'} minDigits={4} />
 	</div>
 
 	<div id="core" class="relative size-48 rounded-full bg-gradient-to-tr from-fuchsia-500/15 via-purple-500/10 to-indigo-500/10">

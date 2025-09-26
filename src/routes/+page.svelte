@@ -25,11 +25,10 @@
 				<p class="text-sm font-bold tracking-wide uppercase">
 					{upgrade.displayName} <span class="text-xs font-normal">Mk. {game.getUpgradeLevel(upgrade.id) + 1}</span>
 				</p>
-				<p class="text-xs text-neutral-300">{upgrade.description}</p>
 				{#each upgrade.effects as effect (effect.stat)}
 					{@const positivity = game.getUpgradePositivity(upgrade.id, effect.stat)}
 					{@const operator = effect.method === 'add' ? (effect.value > 0 ? '+' : '-') : '×'}
-					<div class="mt-1 flex w-full items-center justify-between text-xs text-neutral-300">
+					<div class="my-1 flex w-full items-center justify-between text-xs text-neutral-300">
 						<p>
 							<span class={positivity === 1 ? 'text-lime-500' : positivity === -1 ? 'text-red-500' : 'text-neutral-500'}>
 								{operator}{effect.value.toFixed(2)}
@@ -44,6 +43,7 @@
 						</p>
 					</div>
 				{/each}
+				<p class="text-xs text-pretty text-neutral-300">{upgrade.description}</p>
 				<div class="mt-2 flex w-full items-center gap-x-2">
 					<button
 						class="flex-1 cursor-pointer rounded bg-brand-light px-2 py-1 text-sm hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"

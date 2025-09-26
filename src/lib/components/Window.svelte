@@ -10,7 +10,10 @@
 
 <div
 	{...attribs}
-	class={['smooth-corners rounded-3xl border-[0.5px] border-brand-light bg-gradient-to-tl from-brand-dark from-5% p-4', attribs.class]}
+	class={[
+		'smooth-corners overflow-auto rounded-3xl border-[0.5px] border-brand-light bg-gradient-to-tl from-brand-dark from-5% p-4',
+		attribs.class
+	]}
 >
 	<p class="mb-2 text-xl font-black tracking-widest text-neutral-50 uppercase drop-shadow-sm drop-shadow-fuchsia-700">
 		{title}
