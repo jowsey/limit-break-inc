@@ -12,7 +12,7 @@ export const Stories: Story[] = [
 		id: 'welcome',
 		title: 'Startup Promises Limitless Energy',
 		content:
-			'A new startup by the name of "Limit Break Inc." promises to revolutionize energy production with an innovative new technology powered by a mysterious, newly-discovered resource. This resource — which they\'re dubbing "Flux" — can be found almost everywhere, even in the very air we breathe, and injected into what the company calls a "Flux Core" to generate supposedly limitless power. It\'s still unclear whether this technology will scale, but scientists appear cautiously optimistic, and early tests have supposedly proved successful.'
+			'A new startup by the name of "Limit Break Inc." promises to revolutionize energy production with an innovative new technology powered by a mysterious, newly-discovered resource. This resource — which they\'re dubbing "Flux" — can be found almost anywhere, even in the very air we breathe, and injected into what the company calls a "Flux Core" to generate supposedly limitless power. It\'s still unclear whether this technology will scale, but scientists appear cautiously optimistic, and early tests have supposedly proved successful.'
 	},
 	{
 		id: 'one-watt-generated',
