@@ -103,7 +103,7 @@ export const Upgrades: Upgrade[] = [
 		displayName: 'Thermal Recycling',
 		description:
 			'Improvements to heat efficiency can reduce waste heat generated, increasing the amount of power that can be generated without overloading a Core.',
-		cost: 16,
+		cost: 14.5,
 		effects: [
 			{
 				stat: 'heatPerWatt',
