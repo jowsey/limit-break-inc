@@ -24,7 +24,7 @@
 			const deltaTime = (newTime - currentTime) / 1000;
 			currentTime = newTime;
 
-			let spinRate = baseSpinRate + (maxSpinRate - baseSpinRate) * Math.pow(utilisation, 1.5);
+			let spinRate = baseSpinRate + (maxSpinRate - baseSpinRate) * utilisation ** 1.5;
 			spinRotation = (spinRotation + spinRate * deltaTime) % 360;
 			frame = requestAnimationFrame(spin);
 		};
