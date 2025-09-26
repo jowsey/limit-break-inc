@@ -169,27 +169,27 @@ class Game {
 		const deltaTime = this.stepMs / 1000;
 		const harvestedFlux = this.getUpgradedStat('fluxHarvestRate') * deltaTime;
 
-		let totalFlux = 0;
+		let totalFlux = harvestedFlux;
 
 		for (let i = 0; i < this.persistentState.cores; i++) {
-			let coreInputFlux = harvestedFlux / this.persistentState.cores;
+			let totalClickFlux = 0;
 
 			if (!this.coreClicks[i]) continue;
 
 			// apply clicks
 			for (const click of this.coreClicks[i]) {
-				coreInputFlux += click.flux;
+				totalClickFlux += click.flux;
 			}
 
-			totalFlux += coreInputFlux;
+			totalFlux += totalClickFlux;
 		}
 
 		return totalFlux;
 	}
 
-	tick() {
+	tick(numTicks: number) {
 		// time in hours passed this tick
-		const deltaTime = this.stepMs / 1000;
+		const deltaTime = (this.stepMs / 1000) * numTicks;
 		const deltaHours = deltaTime / 60 / 60;
 
 		const decayRate = this.getUpgradedStat('clickDecayRate');
@@ -244,9 +244,10 @@ class Game {
 
 			this.tickAccumulator += deltaTime;
 
-			while (this.tickAccumulator >= this.stepMs) {
-				this.tickAccumulator -= this.stepMs;
-				this.tick();
+			if (this.tickAccumulator >= this.stepMs) {
+				const numTicks = Math.floor(this.tickAccumulator / this.stepMs);
+				this.tickAccumulator -= this.stepMs * numTicks;
+				this.tick(numTicks);
 			}
 
 			this.animationFrame = requestAnimationFrame(frame);
