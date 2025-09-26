@@ -22,7 +22,7 @@
 	let isLastStory = $derived(activeIndex === game.persistentState.news.unlocked.length - 1);
 </script>
 
-<div class="grow">
+<div class="flex grow flex-col">
 	<div class="flex items-start justify-between">
 		<p class="font-bold tracking-wide uppercase">{activeStory?.title}</p>
 		<div class="my-2 flex justify-between gap-x-1">
@@ -42,7 +42,7 @@
 			</button>
 		</div>
 	</div>
-	<div class="mt-2 flex gap-4">
+	<div class="mt-2 flex h-0 grow gap-4 overflow-y-auto">
 		<img src="https://placecats.com/300/300" class="size-24 rounded-md" alt="article" />
 		<p class="text-justify text-sm leading-tight font-thin text-neutral-300">
 			{activeStory?.content}
