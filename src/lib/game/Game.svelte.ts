@@ -11,6 +11,8 @@ class Game {
 	public timeScale = 60 * 60;
 	// $/kWh
 	public kwhPrice = 0.06;
+	// Exponential efficiency loss when over thermal limit (approaching one is steeper)
+	public efficiencyDropoffExponent = 0.9;
 
 	public static readonly Defaults = {
 		balance: 0,
@@ -220,8 +222,10 @@ class Game {
 			// reduce efficiency when over-utilised
 			const utilisation = (coreInputFlux * wattsPerFlux * heatPerWatt) / thermalLimitDeg;
 			if (utilisation > 1) {
-				// const overUtil = utilisation - 1; // todo drop-off curve
-				coreInputFlux /= utilisation;
+				// efficiency drops off when over 100%
+				const adjustedEfficiency = utilisation ** this.efficiencyDropoffExponent;
+
+				coreInputFlux /= adjustedEfficiency;
 			}
 
 			this.coreOutputs[i] = coreInputFlux * wattsPerFlux;
