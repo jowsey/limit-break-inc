@@ -20,5 +20,12 @@ export const Stories: Story[] = [
 		content:
 			'Energy startup Limit Break Inc. made waves recently after lofty claims of a new limitless energy source. The company says it has conducted initial tests of its Flux technology, successfully delivering a sustained 1 watt of energy. Far from a breakthrough, the company promises it will continue to work on scaling the technology to more practical levels.',
 		requirements: () => game.totalOutput >= 1
+	},
+	{
+		id: 'passive-generation',
+		title: 'Passive Flux Harvesting Tech Unveiled',
+		content:
+			'Limit Break Inc. have announced a new method for harvesting Flux passively from the environment, circumventing the need for manual injection. It is understood that, until now, scientists at the company had been relying on human operators to inject Flux, but this new technology will allow for continuous harvesting and injection, giving the operators a well-deserved break.',
+		requirements: () => game.getUpgradeLevel('flux-injectors') >= 1
 	}
 ] as const;
