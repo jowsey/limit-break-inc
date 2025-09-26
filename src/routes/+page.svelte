@@ -5,7 +5,7 @@
 	import { game } from '$lib/game/Game.svelte';
 </script>
 
-<div class="my-4 flex flex-wrap items-center justify-center">
+<div class="my-4 flex flex-wrap items-center justify-center gap-2">
 	<!-- todo is there a nicer way of doing this (almost certainly yes but i can't think what bc tired) -->
 	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 	{#each new Array(game.persistentState.cores) as _, i (i)}
