@@ -7,7 +7,7 @@ export interface StatValue {
 
 export const DefaultCoreStats: Record<UpgradeStat, number> = {
 	fluxPerClick: 1,
-	clickDecayRate: 0.33,
+	clickDecayRate: 0.25,
 	fluxHarvestRate: 0,
 	wattsPerFlux: 0.1,
 	heatPerWatt: 8,
@@ -76,12 +76,12 @@ export const Upgrades: Upgrade[] = [
 		id: 'flux-injectors',
 		displayName: 'Flux Injectors',
 		description: 'Flux harvested passively from the surrounding area is automatically condensed and injected into Flux Cores.',
-		cost: 12,
+		cost: 8.5,
 		effects: [
 			{
 				stat: 'fluxHarvestRate',
 				method: 'add',
-				value: 13.33
+				value: 16.67
 			}
 		]
 	},
@@ -103,7 +103,7 @@ export const Upgrades: Upgrade[] = [
 		displayName: 'Thermal Recycling',
 		description:
 			'Improvements to heat efficiency can reduce waste heat generated, increasing the amount of power that can be generated without overloading a Core.',
-		cost: 21,
+		cost: 10.5,
 		effects: [
 			{
 				stat: 'heatPerWatt',
@@ -117,7 +117,7 @@ export const Upgrades: Upgrade[] = [
 		id: 'thermal-coating',
 		displayName: 'Thermal Coating',
 		description: 'Advanced coatings can help dissipate heat, increasing the maximum safe operating temperature of a Core.',
-		cost: 30,
+		cost: 15,
 		effects: [
 			{
 				stat: 'thermalLimitDeg',
