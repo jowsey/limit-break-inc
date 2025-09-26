@@ -13,17 +13,16 @@
 	}
 
 	onMount(() => {
+		game.loadState();
 		game.runLoop();
 
-		// Runs on tab close / refresh but notably *not* on HMR (when return function is called)
-		const beforeUnload = () => {
-			game.saveState();
-		};
-
+		// beforeUnload runs on tab close but *not* on HMR, and return runs on HMR but *not* tab close :\
+		const beforeUnload = () => game.saveState();
 		window.addEventListener('beforeunload', beforeUnload);
 
 		return () => {
 			game.stopLoop();
+			game.saveState();
 
 			window.removeEventListener('beforeunload', beforeUnload);
 		};
@@ -63,7 +62,10 @@
 			GENERATING
 		</p>
 
-		<SevenSegmentText text={formatWatts(game.totalOutputSmooth)} class="absolute top-0 left-1/2 mt-1 -translate-x-1/2 text-xl" />
+		<SevenSegmentText
+			text={`${game.getTotalInputFlux().toPrecision(3)} F / ${formatWatts(game.totalOutputSmooth)}`}
+			class="absolute top-0 left-1/2 mt-1 -translate-x-1/2 text-xl"
+		/>
 	</div>
 
 	{@render children?.()}

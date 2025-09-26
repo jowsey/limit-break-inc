@@ -19,7 +19,7 @@ class Game {
 	};
 
 	// State saved to localStorage
-	public persistentState = $state(this.getSavedState());
+	public persistentState: typeof Game.Defaults = $state(Game.Defaults);
 
 	// Output of each active core in watts
 	public coreOutputs: number[] = $state([0]);
@@ -31,7 +31,7 @@ class Game {
 	private averageSampleCount = 15;
 	private totalOutputSamples: number[] = $state([]);
 
-	// Average total output over the last N ticks
+	// Average total output over the last averageSampleCount ticks
 	public totalOutputSmooth = $derived(this.totalOutputSamples.reduce((a, b) => a + b, 0) / Math.max(this.totalOutputSamples.length, 1));
 
 	// 1 is positive, -1 is negative, 0 is neutral
@@ -85,7 +85,7 @@ class Game {
 		if (effect.method === 'add') {
 			total += effect.value * upgradeEntry.count;
 		} else if (effect.method === 'multiply') {
-			total += effect.value ** upgradeEntry.count;
+			total *= effect.value ** upgradeEntry.count;
 		}
 		return total;
 	}
@@ -165,6 +165,28 @@ class Game {
 		return coreOutput * heatPerWatt;
 	}
 
+	getTotalInputFlux() {
+		const deltaTime = this.stepMs / 1000;
+		const harvestedFlux = this.getUpgradedStat('fluxHarvestRate') * deltaTime;
+
+		let totalFlux = 0;
+
+		for (let i = 0; i < this.persistentState.cores; i++) {
+			let coreInputFlux = harvestedFlux / this.persistentState.cores;
+
+			if (!this.coreClicks[i]) continue;
+
+			// apply clicks
+			for (const click of this.coreClicks[i]) {
+				coreInputFlux += click.flux;
+			}
+
+			totalFlux += coreInputFlux;
+		}
+
+		return totalFlux;
+	}
+
 	tick() {
 		// time in hours passed this tick
 		const deltaTime = this.stepMs / 1000;
@@ -177,9 +199,9 @@ class Game {
 		const inputFlux = this.getUpgradedStat('fluxHarvestRate') * deltaTime;
 
 		for (let i = 0; i < this.persistentState.cores; i++) {
-			let coreInputFlux = inputFlux;
+			let coreInputFlux = inputFlux / this.persistentState.cores;
 
-			if (!this.coreClicks[i]) this.coreClicks[i] = [];
+			if (!this.coreClicks[i]) continue;
 
 			// apply clicks
 			for (const click of this.coreClicks[i]) {
@@ -233,6 +255,10 @@ class Game {
 
 	saveState() {
 		localStorage.setItem('lbi-state', JSON.stringify(this.persistentState));
+	}
+
+	loadState() {
+		this.persistentState = this.getSavedState();
 	}
 
 	getSavedState(): typeof Game.Defaults {
