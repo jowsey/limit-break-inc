@@ -5,14 +5,18 @@ class Game {
 	private intervalId: ReturnType<typeof setInterval> | null = null;
 	private tickAccumulator = 0;
 
-	// Amount of real-time between game ticks
-	public stepMs = 1000 / 20;
-	// Speed multiplier on in-game time
-	public timeScale = 60 * 60;
+	private ticksPerSecond = 30;
+	// Seconds passed per tick
+	public deltaTime = 1 / this.ticksPerSecond;
 	// $/kWh
 	public kwhPrice = 0.06;
+	public incomeBoostMultiplier = 3600;
 	// Exponential efficiency loss when over thermal limit (approaching one is steeper)
-	public efficiencyDropoffExponent = 0.9;
+	public efficiencyDropoffExponent = 0.85;
+	// Multiple of limit break progress lost per second
+	public limitBreakDecayMultiplierPerSec = 0.05;
+	// Cost multiplier per upgrade level
+	public upgradeCostScaling = 1.18;
 
 	public static readonly Defaults = {
 		balance: 0,
@@ -23,7 +27,8 @@ class Game {
 		},
 		news: {
 			unlocked: [] as string[]
-		}
+		},
+		limitBreakWh: 0
 	};
 
 	// State saved to localStorage
@@ -65,6 +70,16 @@ class Game {
 			const sign = Math.sign(effect.value - 1);
 			return upgrade.invertPositivity ? -sign : sign;
 		}
+	}
+
+	getLimitBreakProgress() {
+		const maxProgress = this.getLimitBreakCostWattHours();
+		return Math.min(this.persistentState.limitBreakWh / maxProgress, 1);
+	}
+
+	getLimitBreakCostWattHours() {
+		const maxOutput = this.getMaxTotalOutput();
+		return (maxOutput * 30) / 60 / 60; // * [seconds of output] / [60 seconds] / [60 minutes]
 	}
 
 	getUpgradeLevel(upgradeId: string) {
@@ -121,7 +136,7 @@ class Game {
 	calculateUpgradeCost(upgradeId: string) {
 		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
 		const baseCost = Upgrades.find((u) => u.id === upgradeId)?.cost ?? 0;
-		const scaling = Upgrades.find((u) => u.id === upgradeId)?.costScaling ?? 1.22;
+		const scaling = Upgrades.find((u) => u.id === upgradeId)?.costScaling ?? this.upgradeCostScaling;
 
 		if (upgradeEntry) {
 			return baseCost * scaling ** upgradeEntry.count;
@@ -162,7 +177,7 @@ class Game {
 	}
 
 	getCoreTemperature(coreIndex: number) {
-		const heatPerWatt = this.getUpgradedStat('heatPerWatt');
+		const degsPerWatt = this.getUpgradedStat('degsPerWatt');
 
 		if (coreIndex < 0 || coreIndex >= this.persistentState.cores) {
 			console.warn('Tried to get temperature of invalid core index', coreIndex);
@@ -170,21 +185,28 @@ class Game {
 		}
 
 		const coreOutput = this.coreOutputs[coreIndex] ?? 0;
-		return coreOutput * heatPerWatt;
+		return coreOutput * degsPerWatt;
+	}
+
+	// Maximum total output of all cores in watts
+	getMaxTotalOutput() {
+		const degsPerWatt = this.getUpgradedStat('degsPerWatt');
+		const thermalLimitDeg = this.getUpgradedStat('thermalLimitDegs');
+
+		return (thermalLimitDeg / degsPerWatt) * this.persistentState.cores;
 	}
 
 	getTotalInputFlux() {
-		const deltaTime = this.stepMs / 1000;
-		const harvestedFlux = this.getUpgradedStat('fluxHarvestRate') * deltaTime;
+		const harvestedFlux = this.getUpgradedStat('fluxHarvestRate');
 
 		let totalFlux = harvestedFlux;
 
+		// apply clicks
 		for (let i = 0; i < this.persistentState.cores; i++) {
 			let totalClickFlux = 0;
 
 			if (!this.coreClicks[i]) continue;
 
-			// apply clicks
 			for (const click of this.coreClicks[i]) {
 				totalClickFlux += click.flux;
 			}
@@ -196,16 +218,15 @@ class Game {
 	}
 
 	tick() {
-		const deltaTime = this.stepMs / 1000;
-		const deltaHours = deltaTime / 60 / 60;
-
-		const decayRate = this.getUpgradedStat('clickDecayRate');
+		const decayRate = this.getUpgradedStat('clickDecayPerSec');
 		const wattsPerFlux = this.getUpgradedStat('wattsPerFlux');
-		const thermalLimitDeg = this.getUpgradedStat('thermalLimitDeg');
-		const heatPerWatt = this.getUpgradedStat('heatPerWatt');
+		const thermalLimitDeg = this.getUpgradedStat('thermalLimitDegs');
+		const degsPerWatt = this.getUpgradedStat('degsPerWatt');
 
 		// calculate core outputs
-		const inputFlux = this.getUpgradedStat('fluxHarvestRate') * deltaTime;
+		const inputFlux = this.getUpgradedStat('fluxHarvestRate');
+
+		let limitBreakIncreasing = false;
 
 		for (let i = 0; i < this.persistentState.cores; i++) {
 			let coreInputFlux = inputFlux / this.persistentState.cores;
@@ -216,23 +237,34 @@ class Game {
 			for (const click of this.coreClicks[i]) {
 				// we apply before decaying so that clicks always give their full amount at least once
 				coreInputFlux += click.flux;
-				click.flux -= decayRate * deltaTime;
+				click.flux -= decayRate * this.deltaTime;
 			}
 
 			// filter out old clicks
 			this.coreClicks[i] = this.coreClicks[i].filter((click) => click.flux >= 0);
 
 			// reduce efficiency when over-utilised
-			const utilisation = (coreInputFlux * wattsPerFlux * heatPerWatt) / thermalLimitDeg;
-			if (utilisation > 1) {
-				// efficiency drops off when over 100%
-				const adjustedEfficiency = utilisation ** this.efficiencyDropoffExponent;
+			let output = coreInputFlux * wattsPerFlux;
 
-				coreInputFlux /= adjustedEfficiency;
+			const utilisation = (coreInputFlux * wattsPerFlux * degsPerWatt) / thermalLimitDeg;
+			if (utilisation > 1) {
+				output /= utilisation ** this.efficiencyDropoffExponent;
+
+				const wattsOverLimit = output - thermalLimitDeg / degsPerWatt;
+				this.persistentState.limitBreakWh += (wattsOverLimit * this.deltaTime) / 60 / 60;
+				limitBreakIncreasing = true;
 			}
 
-			this.coreOutputs[i] = coreInputFlux * wattsPerFlux;
+			this.coreOutputs[i] = output;
 		}
+
+		// decay limit break progress if not increasing
+		if (!limitBreakIncreasing) {
+			this.persistentState.limitBreakWh -= this.persistentState.limitBreakWh * this.limitBreakDecayMultiplierPerSec * this.deltaTime;
+		}
+
+		// snap limit break progress to zero if close
+		if (this.persistentState.limitBreakWh < 1 / 1000 / 100) this.persistentState.limitBreakWh = 0;
 
 		// smooth total output
 		this.totalOutputSamples.push(this.totalOutput);
@@ -240,9 +272,9 @@ class Game {
 			this.totalOutputSamples.shift();
 		}
 
-		this.persistentState.balance += this.totalOutput * this.kwhPrice * deltaHours * this.timeScale;
+		this.persistentState.balance += this.totalOutput * this.kwhPrice * (this.deltaTime / 60 / 60) * this.incomeBoostMultiplier;
 
-		// check story requirements
+		// test story requirements
 		for (const story of Stories) {
 			if (!this.persistentState.news.unlocked.find((id) => id === story.id) && (!story.requirements || story.requirements())) {
 				this.persistentState.news.unlocked.push(story.id);
@@ -258,27 +290,33 @@ class Game {
 			const deltaTime = newTime - currentTime;
 			currentTime = newTime;
 
-			this.tickAccumulator += deltaTime;
+			this.tickAccumulator += deltaTime / 1000;
 
-			while (this.tickAccumulator >= this.stepMs) {
-				this.tickAccumulator -= this.stepMs;
+			while (this.tickAccumulator >= this.deltaTime) {
+				this.tickAccumulator -= this.deltaTime;
 				this.tick();
 			}
-		}, this.stepMs);
+		}, 1000 / this.ticksPerSecond);
 	}
 
 	stopLoop() {
+		console.log('Stopping tick loop');
 		if (this.intervalId !== null) {
+			console.log('^(Interval found)');
+			this.tickAccumulator = 0;
+
 			clearInterval(this.intervalId);
 			this.intervalId = null;
 		}
 	}
 
 	saveState() {
+		console.log('Saving state');
 		localStorage.setItem('lbi-state', JSON.stringify(this.persistentState));
 	}
 
 	loadState() {
+		console.log('Loading saved state');
 		this.persistentState = this.getSavedState();
 	}
 

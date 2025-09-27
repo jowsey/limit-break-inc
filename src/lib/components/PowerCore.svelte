@@ -9,7 +9,7 @@
 
 	let { i }: Props = $props();
 
-	const utilisation = $derived(game.getCoreTemperature(i) / game.getUpgradedStat('thermalLimitDeg'));
+	const utilisation = $derived(game.getCoreTemperature(i) / game.getUpgradedStat('thermalLimitDegs'));
 	let spinRotation = $state(0);
 
 	const baseSpinRate = 360 / 20;
@@ -38,7 +38,7 @@
 </script>
 
 <button
-	style="--utilisation: {utilisation}; --rotation: {spinRotation}deg;"
+	style="--utilisation: {utilisation}; --rotation: {spinRotation}deg; --over-utilisation: {Math.max(0, utilisation - 1)};"
 	class="relative flex size-48 cursor-pointer items-center justify-center outline-0 transition-all duration-75"
 	onclick={() => game.addCoreClick(i)}
 >
@@ -54,6 +54,7 @@
 		<div class="absolute inset-0 rounded-full border border-white/15 blur-md"></div>
 		<div class="absolute inset-0 rounded-full border border-white/15 blur-lg"></div>
 		<div style="border-width: calc(8px * var(--utilisation))" class="absolute inset-0 rounded-full border-fuchsia-700 blur-lg"></div>
+		<div style="border-width: calc(16px * var(--over-utilisation))" class="absolute inset-0 rounded-full border-red-700 blur-md"></div>
 
 		<div class="relative flex size-full items-center justify-center blur-xs">
 			<div id="core-center" class="rounded-full"></div>

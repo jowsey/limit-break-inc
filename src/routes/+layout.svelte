@@ -3,14 +3,9 @@
 	import { formatWatts } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { game } from '$lib/game/Game.svelte';
-	import { page } from '$app/state';
 	import SevenSegmentText from '$lib/components/SevenSegmentText.svelte';
 
 	let { children } = $props();
-
-	if (page.url.searchParams.get('reset') === 'true') {
-		game.resetState();
-	}
 
 	onMount(() => {
 		game.loadState();
