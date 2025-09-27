@@ -18,6 +18,9 @@ class Game {
 		balance: 0,
 		upgrades: [] as { id: string; count: number }[],
 		cores: 1,
+		stats: {
+			limitBreaks: 0
+		},
 		news: {
 			unlocked: [] as string[]
 		}

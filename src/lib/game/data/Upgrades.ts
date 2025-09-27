@@ -81,7 +81,7 @@ export const Upgrades: Upgrade[] = [
 			{
 				stat: 'fluxHarvestRate',
 				method: 'add',
-				value: 22.22
+				value: 33.33
 			}
 		]
 	},

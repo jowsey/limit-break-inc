@@ -25,7 +25,7 @@
 <div class="flex grow flex-col">
 	<div class="flex items-start justify-between">
 		<p class="font-bold tracking-wide uppercase">{activeStory?.title}</p>
-		<div class="my-2 flex justify-between gap-x-1">
+		<div class="flex items-start justify-between gap-x-1">
 			<button
 				class="cursor-pointer rounded-lg bg-brand-light px-2 py-1 text-sm hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
 				disabled={isFirstStory}
@@ -43,7 +43,7 @@
 		</div>
 	</div>
 	<div class="mt-2 flex h-0 grow gap-4 overflow-y-auto">
-		<img src="https://placecats.com/300/300" class="size-24 rounded-md" alt="article" />
+		<img src="https://placecats.com/300/300" class="size-24 min-h-24 min-w-24 rounded-md object-cover" alt="article" />
 		<p class="text-justify text-sm leading-tight font-thin text-neutral-300">
 			{activeStory?.content}
 		</p>
