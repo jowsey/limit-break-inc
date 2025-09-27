@@ -3,23 +3,20 @@
 	import { game } from '$lib/game/Game.svelte';
 
 	let activeIndex = $state(-1);
-	let activeStory: Story | null = $derived(Stories.find((s) => s.id === game.persistentState.news.unlocked[activeIndex]) ?? null);
+	let activeStory: Story | null = $derived(Stories.find((s) => s.id === game.savedState.news.unlocked[activeIndex]) ?? null);
 
 	let latestSeenIndex = -1;
 
 	// if we don't have a story already or there's one we haven't seen, switch to it
 	$effect(() => {
-		if (
-			(activeIndex === -1 && game.persistentState.news.unlocked.length > 0) ||
-			latestSeenIndex < game.persistentState.news.unlocked.length - 1
-		) {
-			activeIndex = game.persistentState.news.unlocked.length - 1;
+		if ((activeIndex === -1 && game.savedState.news.unlocked.length > 0) || latestSeenIndex < game.savedState.news.unlocked.length - 1) {
+			activeIndex = game.savedState.news.unlocked.length - 1;
 			latestSeenIndex = activeIndex;
 		}
 	});
 
 	let isFirstStory = $derived(activeIndex === 0);
-	let isLastStory = $derived(activeIndex === game.persistentState.news.unlocked.length - 1);
+	let isLastStory = $derived(activeIndex === game.savedState.news.unlocked.length - 1);
 </script>
 
 <div class="flex grow flex-col">
@@ -36,7 +33,7 @@
 			<button
 				class="cursor-pointer rounded-lg bg-brand-light px-2 py-1 text-sm hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
 				disabled={isLastStory}
-				onclick={() => (activeIndex = Math.min(activeIndex + 1, game.persistentState.news.unlocked.length - 1))}
+				onclick={() => (activeIndex = Math.min(activeIndex + 1, game.savedState.news.unlocked.length - 1))}
 			>
 				<p>→</p>
 			</button>

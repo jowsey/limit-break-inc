@@ -25,7 +25,7 @@
 </script>
 
 <svelte:head>
-	<title>${game.persistentState.balance.toFixed(2).toLocaleString()} · LIMIT BREAK INC</title>
+	<title>${game.savedState.balance.toFixed(2).toLocaleString()} · LIMIT BREAK INC</title>
 </svelte:head>
 
 <div class="h-dvh w-dvw overflow-y-auto overscroll-none bg-[oklch(0.115_0.03_324)] px-4 pt-10 text-neutral-50">

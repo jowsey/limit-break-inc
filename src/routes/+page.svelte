@@ -11,15 +11,15 @@
 
 <div class="my-4 flex flex-wrap items-center justify-center gap-2">
 	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
-	{#each Array(game.persistentState.cores) as _, i (i)}
+	{#each Array(game.savedState.cores) as _, i (i)}
 		<PowerCore {i}></PowerCore>
 	{/each}
 </div>
 
-{#if game.persistentState.limitBreak.whStored > 1 / 1000}
+{#if game.savedState.limitBreak.WhStored > 1 / 1000}
 	<div transition:fade class="mt-8 mb-2 flex w-full flex-col items-center gap-y-4">
 		<div class="grid w-full grid-cols-8 items-center gap-8">
-			<SevenSegmentText class="col-span-3 ml-auto" text={formatWattHours(game.persistentState.limitBreak.whStored)} />
+			<SevenSegmentText class="col-span-3 ml-auto" text={formatWattHours(game.savedState.limitBreak.WhStored)} />
 			<div class="relative col-span-2 flex h-10 w-full items-center justify-center border-x border-brand-light">
 				<div
 					style="width: {game.getProgressToNextLimitBreakGoal() * 100}%; 
@@ -31,13 +31,13 @@
 					disabled={game.getDarkFluxReturnedForLimitBreak() == 0}
 					on:click={() => {}}
 				>
-					{game.persistentState.limitBreak.breaksPerformed > 0 ? 'LIMIT BREAK' : '[ ??? ]'}
+					{game.savedState.limitBreak.breaksPerformed > 0 ? 'LIMIT BREAK' : '[ ??? ]'}
 				</button>
 			</div>
 			<SevenSegmentText class="col-span-3" text={formatWattHours(game.getNextLimitBreakGoalWh())} />
 		</div>
 		<p class="text-sm">
-			{#if game.persistentState.limitBreak.breaksPerformed > 0}
+			{#if game.savedState.limitBreak.breaksPerformed > 0}
 				Limit Breaking now will give you
 				<span class="font-bold text-fuchsia-300 tabular-nums">{game.getDarkFluxReturnedForLimitBreak()}</span>
 				Dark Flux
@@ -51,15 +51,15 @@
 <div class="mx-auto grid max-w-7xl auto-rows-[128px] grid-cols-1 gap-4 pt-2 pb-4 sm:grid-cols-2 lg:grid-cols-4">
 	<Window title="Company" class="row-span-2 tabular-nums">
 		<p class="font-thin tracking-widest">BALANCE</p>
-		<p class="text-3xl font-bold">{formatMoney(game.persistentState.balance)}</p>
+		<p class="text-3xl font-bold">{formatMoney(game.savedState.balance)}</p>
 
 		<p class="mt-2 font-thin tracking-widest">SELL VALUE</p>
 		<div class="flex items-end gap-x-1">
-			<p class="text-3xl font-bold">{formatMoney(game.kwhPrice * game.incomeBoostMultiplier)}</p>
+			<p class="text-3xl font-bold">{formatMoney(game.kWhPrice * game.incomeBoostMultiplier)}</p>
 			<p>/kWh</p>
 		</div>
 		<p class="text-xs text-neutral-300">
-			{formatMoney(game.kwhPrice)}/kWh * {game.incomeBoostMultiplier}x research subsidy
+			{formatMoney(game.kWhPrice)}/kWh * {game.incomeBoostMultiplier}x research subsidy
 		</p>
 	</Window>
 
@@ -100,7 +100,7 @@
 						<button
 							class="flex-1 cursor-pointer rounded bg-brand-light px-2 py-1 text-sm select-none hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
 							on:click={() => game.purchaseUpgrade(upgrade.id)}
-							disabled={game.persistentState.balance < game.calculateUpgradeCost(upgrade.id)}
+							disabled={game.savedState.balance < game.calculateUpgradeCost(upgrade.id)}
 						>
 							<p>UPGRADE</p>
 						</button>
