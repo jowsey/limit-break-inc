@@ -29,7 +29,7 @@
 </svelte:head>
 
 <div class="h-dvh w-dvw overflow-y-auto overscroll-none bg-[oklch(0.115_0.03_324)] px-4 pt-10 text-neutral-50">
-	<div class="absolute top-0 left-0 flex h-10 w-dvw overflow-hidden">
+	<div class="absolute top-0 left-0 z-20 flex h-10 w-dvw overflow-hidden">
 		<svg class="flex-1" viewBox="0 0 386 32" preserveAspectRatio="none">
 			<path d="M0,0 L0,10 L386,10 L386,0 Z" fill="var(--color-brand-dark)" />
 			<path d="M0,10 L386,10" fill="none" stroke="var(--color-brand-light)" stroke-width="0.5" />

@@ -43,7 +43,7 @@
 	onclick={() => game.addCoreClick(i)}
 >
 	<p class="absolute ml-[0.5em] text-xl font-black tracking-[0.5em] text-neutral-50/5 select-none">CORE {i + 1}</p>
-	<div class="absolute flex flex-col items-center">
+	<div class="absolute z-10 flex flex-col items-center">
 		<SevenSegmentText class="text-xl" text={Math.round(game.getCoreTemperature(i)) + '°C'} minDigits={5} />
 		<SevenSegmentText class="text-sm" text={Math.round(utilisation * 100) + '%'} minDigits={4} />
 	</div>
