@@ -13,7 +13,7 @@ class Game {
 	public incomeBoostMultiplier = 3600;
 	// Exponential efficiency loss when over thermal limit (approaching one is steeper)
 	public efficiencyDropoffExponent = 0.85;
-	// Multiple of limit break progress lost per second
+	// Portion of limit break progress lost per second
 	public limitBreakDecayMultiplierPerSec = 0.05;
 	// Cost multiplier per upgrade level
 	public upgradeCostScaling = 1.18;
@@ -22,13 +22,13 @@ class Game {
 		balance: 0,
 		upgrades: [] as { id: string; count: number }[],
 		cores: 1,
-		stats: {
-			limitBreaks: 0
+		limitBreak: {
+			breaksPerformed: 0,
+			whStored: 0
 		},
 		news: {
 			unlocked: [] as string[]
-		},
-		limitBreakWh: 0
+		}
 	};
 
 	// State saved to localStorage
@@ -72,19 +72,30 @@ class Game {
 		}
 	}
 
-	getLimitBreakProgress() {
-		const maxProgress = this.getLimitBreakCostWattHours();
-		return Math.min(this.persistentState.limitBreakWh / maxProgress, 1);
+	// Next power of 10 above current limit break watt-hours
+	getNextLimitBreakGoalWh() {
+		return 10 ** Math.ceil(Math.max(Math.log10(this.persistentState.limitBreak.whStored), 0));
 	}
 
-	getLimitBreakCostWattHours() {
-		const maxOutput = this.getMaxTotalOutput();
-		return (maxOutput * 30) / 60 / 60; // * [seconds of output] / [60 seconds] / [60 minutes]
+	getProgressToNextLimitBreakGoal() {
+		const nextGoal = this.getNextLimitBreakGoalWh();
+		return Math.min(this.persistentState.limitBreak.whStored / nextGoal, 1);
+	}
+
+	getDarkFluxReturnedForLimitBreak() {
+		// 1 DF per 10x increase starting at 1Wh
+		return Math.floor(Math.log10(this.getNextLimitBreakGoalWh()));
 	}
 
 	getUpgradeLevel(upgradeId: string) {
+		const upgrade = Upgrades.find((u) => u.id === upgradeId);
+		if (!upgrade) {
+			console.warn('Tried to get level for unknown upgrade', upgradeId);
+			return 0;
+		}
+
 		const upgradeEntry = this.persistentState.upgrades.find((u) => u.id === upgradeId);
-		return upgradeEntry ? upgradeEntry.count : 0;
+		return upgradeEntry ? upgradeEntry.count + (upgrade.countOneHigher ? 1 : 0) : 0;
 	}
 
 	getUpgradeEffectTotal(upgradeId: string, forStat: UpgradeStat) {
@@ -251,7 +262,7 @@ class Game {
 				output /= utilisation ** this.efficiencyDropoffExponent;
 
 				const wattsOverLimit = output - thermalLimitDeg / degsPerWatt;
-				this.persistentState.limitBreakWh += (wattsOverLimit * this.deltaTime) / 60 / 60;
+				this.persistentState.limitBreak.whStored += (wattsOverLimit * this.deltaTime) / 60 / 60;
 				limitBreakIncreasing = true;
 			}
 
@@ -260,11 +271,11 @@ class Game {
 
 		// decay limit break progress if not increasing
 		if (!limitBreakIncreasing) {
-			this.persistentState.limitBreakWh -= this.persistentState.limitBreakWh * this.limitBreakDecayMultiplierPerSec * this.deltaTime;
+			this.persistentState.limitBreak.whStored -=
+				this.persistentState.limitBreak.whStored * this.limitBreakDecayMultiplierPerSec * this.deltaTime;
+			// snap to zero if close
+			if (this.persistentState.limitBreak.whStored < 1 / 1000) this.persistentState.limitBreak.whStored = 0;
 		}
-
-		// snap limit break progress to zero if close
-		if (this.persistentState.limitBreakWh < 1 / 1000 / 100) this.persistentState.limitBreakWh = 0;
 
 		// smooth total output
 		this.totalOutputSamples.push(this.totalOutput);
@@ -324,7 +335,7 @@ class Game {
 		const storedData = JSON.parse(localStorage.getItem('lbi-state') ?? 'null');
 		const data = Object.assign({}, Game.Defaults, storedData); // apply over defaults to ensure all keys exist
 
-		// placeholder: migrate data if need-be
+		// placeholder: data migrations
 		return data;
 	}
 
