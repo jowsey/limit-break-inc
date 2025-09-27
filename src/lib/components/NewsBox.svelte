@@ -5,7 +5,7 @@
 	let activeIndex = $state(-1);
 	let activeStory: Story | null = $derived(Stories.find((s) => s.id === game.persistentState.news.unlocked[activeIndex]) ?? null);
 
-	let latestSeenIndex = $state(-1);
+	let latestSeenIndex = -1;
 
 	// if we don't have a story already or there's one we haven't seen, switch to it
 	$effect(() => {
@@ -42,9 +42,9 @@
 			</button>
 		</div>
 	</div>
-	<div class="mt-2 flex h-0 grow gap-4 overflow-y-auto">
-		<img src="https://placecats.com/300/300" class="size-24 min-h-24 min-w-24 rounded-md object-cover" alt="article" />
-		<p class="text-justify text-sm leading-tight font-thin text-neutral-300">
+	<div class="mt-2 h-0 grow overflow-y-auto">
+		<img src="https://placecats.com/300/300" class="float-left mr-4 size-20 min-h-20 min-w-20 rounded-md object-cover" alt="article" />
+		<p class="text-justify text-sm leading-tight font-thin whitespace-pre-wrap text-neutral-300">
 			{activeStory?.content}
 		</p>
 	</div>
