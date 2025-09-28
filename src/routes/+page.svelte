@@ -23,7 +23,7 @@
 			<div class="relative col-span-2 flex h-10 w-full items-center justify-center border-x border-brand-light">
 				<div
 					style="width: {game.getLocalLimitBreakProgress() * 100}%; 
-						   filter: contrast(calc(0.5 + {game.getLocalLimitBreakProgress()}));"
+						   filter: contrast(calc(0.25 + {game.getLocalLimitBreakProgress() * 2}));"
 					class="absolute left-0 h-full bg-gradient-to-r from-indigo-400/25 to-fuchsia-400/25"
 				></div>
 				<button
