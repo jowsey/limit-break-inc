@@ -35,5 +35,19 @@ export const Stories: Story[] = [
 		content:
 			'As labs continue to experiment with emerging Flux technology, scientists are raising concerns about potential risks that come with exceeding the thermal limits of Flux Cores. They warn that pushing the technology beyond its limits could lead to catastrophic failures. Leading startup Limit Break Inc. has stated that it is aware of these concerns and is working on better understanding the dangers its tech.',
 		requirements: () => game.getCoreTemperature(0) / game.getUpgradedStat('thermalLimitDegs') >= 0.8
+	},
+	{
+		id: 'kilowatt-generated',
+		title: 'Flux Tech Passes Kilowatt Barrier',
+		content:
+			'In a significant milestone, energy startup Limit Break Inc. has announced that it has successfully managed to generate a sustained 1 kilowatt of power with its "Flux Core" tech. The company only just recently managed to pass the 10 watt mark, but it seems to be showing no signs of slowing down. The lab is hopeful that the tech can be scaled even further.',
+		requirements: () => game.totalOutput >= 1000
+	},
+	{
+		id: 'limit-break-rumours',
+		title: 'Leaked Video Shows Overloaded Flux Core',
+		content:
+			'A leaked video has surfaced online, purportedly showing a Flux Core in use at Limit Break Inc. being pushed far beyond its thermal limits. The video shows the core glowing a bright red and emitting a high-pitched whine. Scientists warn that regularly exceeding the thermal limits of Flux Cores could lead to catastrophe, and have urged the lab to conduct further safety research.\n\nLimit Break Inc. has not yet responded to requests for comment.',
+		requirements: () => game.getCoreTemperature(0) / game.getUpgradedStat('thermalLimitDegs') >= 1.05
 	}
 ] as const;
