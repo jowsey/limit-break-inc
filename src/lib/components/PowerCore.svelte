@@ -44,8 +44,8 @@
 >
 	<p class="absolute ml-[0.5em] text-xl font-black tracking-[0.5em] text-neutral-50/5 select-none">CORE {i + 1}</p>
 	<div class="absolute z-10 flex flex-col items-center">
-		<SevenSegmentText class="text-xl" text={Math.round(game.getCoreTemperature(i)) + '°C'} minDigits={5} />
-		<SevenSegmentText class="text-sm" text={Math.round(utilisation * 100) + '%'} minDigits={4} />
+		<SevenSegmentText class="text-xl" text={Math.round(utilisation * 100) + '%'} minDigits={4} />
+		<SevenSegmentText class="text-xs" text={Math.round(game.getCoreTemperature(i)) + '°C'} minDigits={6} />
 	</div>
 
 	<div id="core" class="relative size-48 rounded-full bg-gradient-to-tr from-fuchsia-500/15 via-purple-500/10 to-indigo-500/10">
