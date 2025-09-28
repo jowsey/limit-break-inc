@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { formatWatts } from '$lib/utils';
+	import { formatMoney, formatWatts } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { game } from '$lib/game/Game.svelte';
 	import SevenSegmentText from '$lib/components/SevenSegmentText.svelte';
@@ -25,7 +25,7 @@
 </script>
 
 <svelte:head>
-	<title>${game.savedState.balance.toFixed(2).toLocaleString()} · LIMIT BREAK INC</title>
+	<title>{formatMoney(game.savedState.balance)} · LIMIT BREAK INC</title>
 </svelte:head>
 
 <div class="h-dvh w-dvw overflow-y-auto overscroll-none bg-[oklch(0.115_0.03_324)] px-4 pt-10 text-neutral-50">
