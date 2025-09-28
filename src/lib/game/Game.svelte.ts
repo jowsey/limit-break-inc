@@ -340,6 +340,10 @@ class Game {
 
 	resetState() {
 		this.savedState = Game.Defaults;
+		this.coreOutputs = [];
+		this.coreClicks = [];
+		this.totalOutputSamples = [];
+
 		this.saveState();
 	}
 }
