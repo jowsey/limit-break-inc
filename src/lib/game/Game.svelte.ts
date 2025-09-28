@@ -14,7 +14,7 @@ class Game {
 	// Exponential efficiency loss when over thermal limit (approaching one is steeper)
 	public efficiencyDropoffExponent = 0.85;
 	// Portion of limit break progress lost per second
-	public limitBreakDecayMultiplierPerSec = 0.05;
+	public limitBreakDecayMultiplierPerSec = 0.1;
 	// Cost multiplier per upgrade level
 	public upgradeCostScaling = 1.18;
 
@@ -24,7 +24,8 @@ class Game {
 		cores: 1,
 		limitBreak: {
 			breaksPerformed: 0,
-			WhStored: 0
+			WhStored: 0,
+			darkFlux: 0
 		},
 		news: {
 			unlocked: [] as string[]
@@ -72,19 +73,37 @@ class Game {
 		}
 	}
 
-	// Next power of 10 above current limit break watt-hours
+	getReachedLimitBreakGoalWh() {
+		// Last 1Wh
+		return Math.floor(this.savedState.limitBreak.WhStored);
+	}
+
 	getNextLimitBreakGoalWh() {
-		return 10 ** Math.ceil(Math.max(Math.log10(this.savedState.limitBreak.WhStored), 0));
+		// Next power of 10 above current limit break watt-hours
+		// return 10 ** Math.ceil(Math.max(Math.log10(this.savedState.limitBreak.WhStored), 0));
+
+		// Next 1Wh
+		return Math.floor(this.savedState.limitBreak.WhStored + 1);
 	}
 
 	getProgressToNextLimitBreakGoal() {
+		return Math.min(this.savedState.limitBreak.WhStored / this.getNextLimitBreakGoalWh(), 1);
+	}
+
+	// Progress to next goal relative to last reached goal
+	getLocalLimitBreakProgress() {
+		const lastGoal = this.getReachedLimitBreakGoalWh();
 		const nextGoal = this.getNextLimitBreakGoalWh();
-		return Math.min(this.savedState.limitBreak.WhStored / nextGoal, 1);
+
+		return Math.min((this.savedState.limitBreak.WhStored - lastGoal) / (nextGoal - lastGoal), 1);
 	}
 
 	getDarkFluxReturnedForLimitBreak() {
 		// 1 DF per 10x increase starting at 1Wh
-		return Math.floor(Math.log10(this.getNextLimitBreakGoalWh()));
+		// return Math.floor(Math.log10(this.getNextLimitBreakGoalWh()));
+
+		// 1 DF per 1Wh
+		return Math.floor(this.savedState.limitBreak.WhStored);
 	}
 
 	getUpgradeLevel(upgradeId: string) {
@@ -270,8 +289,13 @@ class Game {
 		}
 
 		// decay limit break progress if not increasing
-		if (!limitBreakIncreasing) {
-			this.savedState.limitBreak.WhStored -= this.savedState.limitBreak.WhStored * this.limitBreakDecayMultiplierPerSec * this.deltaTime;
+		if (!limitBreakIncreasing && this.savedState.limitBreak.WhStored > this.getReachedLimitBreakGoalWh()) {
+			// don't decay below last reached goal
+			const lastGoal = this.getReachedLimitBreakGoalWh();
+			const whAboveGoal = this.savedState.limitBreak.WhStored - lastGoal;
+			this.savedState.limitBreak.WhStored -= whAboveGoal * this.limitBreakDecayMultiplierPerSec * this.deltaTime;
+			if (this.savedState.limitBreak.WhStored < lastGoal) this.savedState.limitBreak.WhStored = lastGoal;
+
 			// snap to zero if close
 			if (this.savedState.limitBreak.WhStored < 1 / 1000) this.savedState.limitBreak.WhStored = 0;
 		}

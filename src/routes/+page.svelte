@@ -22,8 +22,8 @@
 			<SevenSegmentText class="col-span-3 ml-auto" text={formatWattHours(game.savedState.limitBreak.WhStored)} />
 			<div class="relative col-span-2 flex h-10 w-full items-center justify-center border-x border-brand-light">
 				<div
-					style="width: {game.getProgressToNextLimitBreakGoal() * 100}%; 
-						   filter: contrast(calc(0.5 + {game.getProgressToNextLimitBreakGoal()}));"
+					style="width: {game.getLocalLimitBreakProgress() * 100}%; 
+						   filter: contrast(calc(0.5 + {game.getLocalLimitBreakProgress()}));"
 					class="absolute left-0 h-full bg-gradient-to-r from-indigo-400/25 to-fuchsia-400/25"
 				></div>
 				<button
