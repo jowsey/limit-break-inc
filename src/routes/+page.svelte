@@ -67,8 +67,9 @@
 		<NewsBox />
 	</Window>
 
-	<Window title="Parts" class="row-span-5 tabular-nums">
-		<div class="-mx-4 overflow-y-auto">
+	<Window title="Components" class="row-span-5 tabular-nums">
+		<p class="text-xs italic">With a bit of money, we can upgrade our core components and improve our output.</p>
+		<div class="-mx-4 mt-4 overflow-y-auto">
 			{#each Upgrades as upgrade (upgrade.id)}
 				<div class="mb-1 flex flex-col bg-neutral-50/5 p-2">
 					<p class="text-sm font-bold tracking-wide uppercase">
