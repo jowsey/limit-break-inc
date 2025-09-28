@@ -24,7 +24,7 @@ class Game {
 		cores: 1,
 		limitBreak: {
 			breaksPerformed: 0,
-			WhStored: 0,
+			whStored: 0,
 			darkFlux: 0
 		},
 		news: {
@@ -75,7 +75,7 @@ class Game {
 
 	getReachedLimitBreakGoalWh() {
 		// Last 1Wh
-		return Math.floor(this.savedState.limitBreak.WhStored);
+		return Math.floor(this.savedState.limitBreak.whStored);
 	}
 
 	getNextLimitBreakGoalWh() {
@@ -83,11 +83,11 @@ class Game {
 		// return 10 ** Math.ceil(Math.max(Math.log10(this.savedState.limitBreak.WhStored), 0));
 
 		// Next 1Wh
-		return Math.floor(this.savedState.limitBreak.WhStored + 1);
+		return Math.floor(this.savedState.limitBreak.whStored + 1);
 	}
 
 	getProgressToNextLimitBreakGoal() {
-		return Math.min(this.savedState.limitBreak.WhStored / this.getNextLimitBreakGoalWh(), 1);
+		return Math.min(this.savedState.limitBreak.whStored / this.getNextLimitBreakGoalWh(), 1);
 	}
 
 	// Progress to next goal relative to last reached goal
@@ -95,7 +95,7 @@ class Game {
 		const lastGoal = this.getReachedLimitBreakGoalWh();
 		const nextGoal = this.getNextLimitBreakGoalWh();
 
-		return Math.min((this.savedState.limitBreak.WhStored - lastGoal) / (nextGoal - lastGoal), 1);
+		return Math.min((this.savedState.limitBreak.whStored - lastGoal) / (nextGoal - lastGoal), 1);
 	}
 
 	getDarkFluxReturnedForLimitBreak() {
@@ -103,7 +103,7 @@ class Game {
 		// return Math.floor(Math.log10(this.getNextLimitBreakGoalWh()));
 
 		// 1 DF per 1Wh
-		return Math.floor(this.savedState.limitBreak.WhStored);
+		return Math.floor(this.savedState.limitBreak.whStored);
 	}
 
 	getUpgradeLevel(upgradeId: string) {
@@ -281,7 +281,7 @@ class Game {
 				output /= utilisation ** this.efficiencyDropoffExponent;
 
 				const wattsOverLimit = output - thermalLimitDeg / degsPerWatt;
-				this.savedState.limitBreak.WhStored += (wattsOverLimit * this.deltaTime) / 60 / 60;
+				this.savedState.limitBreak.whStored += (wattsOverLimit * this.deltaTime) / 60 / 60;
 				limitBreakIncreasing = true;
 			}
 
@@ -289,15 +289,12 @@ class Game {
 		}
 
 		// decay limit break progress if not increasing
-		if (!limitBreakIncreasing && this.savedState.limitBreak.WhStored > this.getReachedLimitBreakGoalWh()) {
+		if (!limitBreakIncreasing && Math.abs(this.savedState.limitBreak.whStored - this.getReachedLimitBreakGoalWh()) > 0.001) {
 			// don't decay below last reached goal
 			const lastGoal = this.getReachedLimitBreakGoalWh();
-			const whAboveGoal = this.savedState.limitBreak.WhStored - lastGoal;
-			this.savedState.limitBreak.WhStored -= whAboveGoal * this.limitBreakDecayMultiplierPerSec * this.deltaTime;
-			if (this.savedState.limitBreak.WhStored < lastGoal) this.savedState.limitBreak.WhStored = lastGoal;
-
-			// snap to zero if close
-			if (this.savedState.limitBreak.WhStored < 1 / 1000) this.savedState.limitBreak.WhStored = 0;
+			const whAboveGoal = this.savedState.limitBreak.whStored - lastGoal;
+			this.savedState.limitBreak.whStored -= whAboveGoal * this.limitBreakDecayMultiplierPerSec * this.deltaTime;
+			if (this.savedState.limitBreak.whStored < lastGoal) this.savedState.limitBreak.whStored = lastGoal;
 		}
 
 		// smooth total output

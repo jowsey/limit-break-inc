@@ -16,10 +16,10 @@
 	{/each}
 </div>
 
-{#if game.savedState.limitBreak.WhStored > 1 / 1000}
+{#if game.savedState.limitBreak.whStored > 1 / 1000}
 	<div transition:fade class="mt-8 mb-2 flex w-full flex-col items-center gap-y-4">
 		<div class="grid w-full grid-cols-8 items-center gap-8">
-			<SevenSegmentText class="col-span-3 ml-auto" text={formatWattHours(game.savedState.limitBreak.WhStored)} />
+			<SevenSegmentText class="col-span-3 ml-auto" text={formatWattHours(game.savedState.limitBreak.whStored)} />
 			<div class="relative col-span-2 flex h-10 w-full items-center justify-center border-x border-brand-light">
 				<div
 					style="width: {game.getLocalLimitBreakProgress() * 100}%; 
@@ -31,18 +31,28 @@
 					disabled={game.getDarkFluxReturnedForLimitBreak() == 0}
 					on:click={() => {}}
 				>
-					{game.savedState.limitBreak.breaksPerformed > 0 ? 'LIMIT BREAK' : '[ ??? ]'}
+					{#if game.savedState.limitBreak.breaksPerformed > 0}
+						LIMIT BREAK
+					{:else if game.getDarkFluxReturnedForLimitBreak() > 0}
+						Investigate...
+					{:else}
+						???
+					{/if}
 				</button>
 			</div>
 			<SevenSegmentText class="col-span-3" text={formatWattHours(game.getNextLimitBreakGoalWh())} />
 		</div>
-		<p class="text-sm">
+		<p class="text-center text-sm">
 			{#if game.savedState.limitBreak.breaksPerformed > 0}
 				Limit Breaking now will give you
 				<span class="font-bold text-fuchsia-300 tabular-nums">{game.getDarkFluxReturnedForLimitBreak()}</span>
 				Dark Flux
 			{:else}
 				<i>When pushed beyond its limits, the Core appears to feed on excess energy to protect itself...</i>
+				{#if game.getDarkFluxReturnedForLimitBreak() > 0}
+					<br />
+					The Core's brimming with energy. Running some tests on it might prove beneficial.
+				{/if}
 			{/if}
 		</p>
 	</div>
