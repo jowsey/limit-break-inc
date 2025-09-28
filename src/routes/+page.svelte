@@ -9,7 +9,7 @@
 	import { fade } from 'svelte/transition';
 </script>
 
-<div class="my-4 flex flex-wrap items-center justify-center gap-2">
+<div class="mx-auto my-4 flex max-w-7xl flex-wrap items-center justify-center gap-2">
 	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 	{#each Array(game.savedState.cores) as _, i (i)}
 		<PowerCore {i}></PowerCore>
@@ -17,10 +17,13 @@
 </div>
 
 {#if game.savedState.limitBreak.whStored > 1 / 1000}
-	<div transition:fade class="mt-8 mb-2 flex w-full flex-col items-center gap-y-4">
-		<div class="grid w-full grid-cols-8 items-center gap-8">
-			<SevenSegmentText class="col-span-3 ml-auto" text={formatWattHours(game.savedState.limitBreak.whStored)} />
-			<div class="relative col-span-2 flex h-10 w-full items-center justify-center border-x border-brand-light">
+	<div transition:fade class="mx-auto mt-8 mb-2 flex w-full max-w-7xl flex-col items-center gap-y-4">
+		<div class="grid w-full grid-cols-2 items-center gap-4 sm:grid-cols-3 md:gap-8">
+			<!-- top-left -> sm:left -->
+			<SevenSegmentText class="sm:ml-auto" text={formatWattHours(game.savedState.limitBreak.whStored)} />
+
+			<!-- bottom -> sm:middle -->
+			<div class="relative flex h-10 w-full items-center justify-center border-x border-brand-light max-sm:col-span-2">
 				<div
 					style="width: {game.getLocalLimitBreakProgress() * 100}%; 
 						   filter: contrast(calc(0.25 + {game.getLocalLimitBreakProgress() * 2}));"
@@ -40,7 +43,12 @@
 					{/if}
 				</button>
 			</div>
-			<SevenSegmentText class="col-span-3" text={formatWattHours(game.getNextLimitBreakGoalWh())} />
+
+			<!-- top-right -> sm:right -->
+			<SevenSegmentText
+				class="max-sm:col-start-2 max-sm:row-start-1 max-sm:ml-auto"
+				text={formatWattHours(game.getNextLimitBreakGoalWh())}
+			/>
 		</div>
 		<p class="text-center text-sm">
 			{#if game.savedState.limitBreak.breaksPerformed > 0}
