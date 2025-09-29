@@ -130,17 +130,4 @@
 			{/each}
 		</div>
 	</Window>
-
-	<Window title="Other">
-		<p>yuuup</p>
-	</Window>
-	<Window title="Misc">
-		<p>yuuup</p>
-	</Window>
-	<Window title="Other">
-		<p>yuuup</p>
-	</Window>
-	<Window title="Other">
-		<p>yuuup</p>
-	</Window>
 </div>
