@@ -2,7 +2,7 @@
 
 A game about power for the AGDS Freshers Jam 2025.
 
-![Game screenshot](.github/screenshot.png)
+![Game screenshot](.github/screenshot.webp)
 
 Built with [Bun](https://bun.sh).
 
